@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   id: "socketio-client",
   context: {
     namespace: "namespace-1",
@@ -57,3 +57,5 @@ module.exports = {
     },
   },
 };
+
+module.exports = config;

@@ -1,6 +1,6 @@
 const { PORT = 3030 } = process.env;
 
-module.exports = {
+const config = {
   id: "socketio-server",
   context: {
     namespaces: ["namespace-1"],
@@ -60,3 +60,5 @@ module.exports = {
     },
   },
 };
+
+module.exports = config;

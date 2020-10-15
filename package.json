@@ -5,6 +5,7 @@
   "main": "server",
   "scripts": {
     "socket-server": "node server socket-server",
+    "socket-client": "node client socket-client",
     "kafka-producer": "node server kafka-producer",
     "kafka-consumer": "node server kafka-consumer"
   },

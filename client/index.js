@@ -1,19 +1,19 @@
-const io = require("socket.io-client");
+const machine_name = process.argv[2] || "socket-client";
 
-const socket = io("http://localhost:3030/");
+console.log(machine_name);
 
-socket.on("heartbeat", (payload) => {
-  console.log(
-    `[Socket.io] Heartbeat from ${payload.from} at ${
-      payload.updated_date
-    } recieved at ${new Date().toISOString()}`
-  );
+const { config, implementation } = require(`../machines/${machine_name}`);
+
+const { Machine, interpret } = require("xstate");
+
+const machine = Machine(config, implementation);
+
+const service = interpret(machine);
+
+// service.onEvent((e) => {});
+
+service.onDone(() => {
+  process.exit(0);
 });
 
-socket.on("disconnect", () => {
-  console.log("[Socket.io] Socket has disconnected from Server");
-});
-
-socket.on("connect", () => {
-  console.log(`[Socket.io] Socket has connected to Server`);
-});
+service.start();

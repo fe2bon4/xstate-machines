@@ -1,60 +1,62 @@
-module.exports = {
-  id: 'kafka-producer',
-  initial: 'initializing',
+const config = {
+  id: "kafka-producer",
+  initial: "initializing",
   context: {
-    brokers: ['localhost:9092'],
+    brokers: ["localhost:9092"],
     producer_id: "machine-producer",
-    topic: 'default',
+    topic: "default",
     config: {
       metadataMaxAge: 300000,
       allowAutoTopicCreation: true,
       transactionTimeout: 60000,
-      maxInFlightRequests: null
+      maxInFlightRequests: null,
     },
     kafka: null,
-    producer: null
+    producer: null,
   },
   states: {
     error: {
-      type: 'final'
+      type: "final",
     },
     initializing: {
-      entry: 'logInitializingState',
+      entry: "logInitializingState",
       invoke: {
-        id: 'initializing',
-        src: 'initializing'
+        id: "initializing",
+        src: "initializing",
       },
       on: {
         KAFKA_INITIALIZED: {
-          actions: 'assignKafkaInstance'
+          actions: "assignKafkaInstance",
         },
         PRODUCER_INITIALIZED: {
-          actions: 'assignProducerInstance'
+          actions: "assignProducerInstance",
         },
-        PRODUCER_CONNECTED: 'running',
+        PRODUCER_CONNECTED: "running",
         ERROR: {
-          actions: ['logError'],
-          target: 'error'
-        }
-      }
+          actions: ["logError"],
+          target: "error",
+        },
+      },
     },
     running: {
-      entry: 'logRunningState',
+      entry: "logRunningState",
       invoke: [
         {
-          id: 'producer',
-          src: 'producer'
-        }
+          id: "producer",
+          src: "producer",
+        },
       ],
       on: {
         SEND_TO_TOPIC: {
-          actions: ['logMessage','sendToProducer']
+          actions: ["logMessage", "sendToProducer"],
         },
         SENT_TO_TOPIC: {
-          actions: ['logMessageSent']
+          actions: ["logMessageSent"],
         },
-        ERROR: 'error'
-      }
-    }
-  }
-}
+        ERROR: "error",
+      },
+    },
+  },
+};
+
+module.exports = config;

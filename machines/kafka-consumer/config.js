@@ -1,22 +1,21 @@
-module.exports = {
-  id: 'kafka-consumer',
-  initial: 'initializing',
+const config = {
+  id: "kafka-consumer",
+  initial: "initializing",
   context: {
-    brokers: ['localhost:9092'],
+    brokers: ["localhost:9092"],
     consumer_id: "machine-consumer",
-    topic: 'default',
+    topic: "default",
     consumer_config: {
-      groupId: 'test-dddddd',
+      groupId: "test-group",
       sessionTimeout: 30000,
       heartbeatInterval: 3000,
       metadataMaxAge: 300000,
       allowAutoTopicCreation: true,
       maxBytesPerPartition: 1048576, // (1MB),
       minBytes: 1,
-      maxBytes: 10485760,  // (10MB),
+      maxBytes: 10485760, // (10MB),
       retry: 10,
-      readUncommitted: false
-
+      readUncommitted: false,
     },
     run_config: {
       autoCommit: true,
@@ -25,67 +24,69 @@ module.exports = {
     },
     from_beginning: true,
     kafka: null,
-    consumer: null
+    consumer: null,
   },
   states: {
     error: {
-      type: 'final'
+      type: "final",
     },
     initializing: {
-      entry: 'logInitializingState',
+      entry: "logInitializingState",
       invoke: {
-        id: 'initializing',
-        src: 'initializing'
+        id: "initializing",
+        src: "initializing",
       },
       on: {
         KAFKA_INITIALIZED: {
-          actions: 'assignKafkaInstance'
+          actions: "assignKafkaInstance",
         },
         CONSUMER_INITIALIZED: {
-          actions: 'assignConsumerInstance'
+          actions: "assignConsumerInstance",
         },
-        CONSUMER_CONNECTED: 'running',
+        CONSUMER_CONNECTED: "running",
         ERROR: {
-          actions: ['logError'],
-          target: 'error'
-        }
-      }
+          actions: ["logError"],
+          target: "error",
+        },
+      },
     },
-   
+
     running: {
-      entry: ['logRunningState'],
+      entry: ["logRunningState"],
       invoke: [
         {
-          id: 'consumer',
-          src: 'consumer'
-        }
+          id: "consumer",
+          src: "consumer",
+        },
       ],
-      initial: 'consuming', 
+      initial: "consuming",
       states: {
         paused: {
           on: {
             RESUME: {
-              actions: ['resumeConsumer'],
-              target: 'consuming'
-            }
-          }
+              actions: ["resumeConsumer"],
+              target: "consuming",
+            },
+          },
         },
         consuming: {
           on: {
             PAUSE: {
-              actions: ['pauseConsumer'],
-              target: 'paused'
+              actions: ["pauseConsumer"],
+              target: "paused",
             },
-          }
-        }
+          },
+        },
       },
-      
+
       on: {
         TOPIC_MESSAGE: {
-          actions: ['logMessage','sendToInvoker']
+          actions: ["logMessage", "sendToInvoker"],
         },
-        ERROR: 'error'
-      }
-    }
-  }
-}
+        ERROR: "error",
+      },
+    },
+  },
+};
+
+module.exports = config;
