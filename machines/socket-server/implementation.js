@@ -92,17 +92,17 @@ module.exports = {
 
       const namespaces = [...ctx.namespaces, "/"];
 
-      // namespaces.forEach((name) => {
-      //   const heartbeat_function = (updated_date) => {
-      //     const namespace = name === "/" ? "" : name;
+      namespaces.forEach((name) => {
+        const heartbeat_function = (updated_date) => {
+          const namespace = name === "/" ? "" : name;
 
-      //     server.of(`/${namespace}`).emit("heartbeat", {
-      //       updated_date,
-      //       from: namespace,
-      //     });
-      //   };
-      //   setInterval(heartbeat_function, 2000, new Date().toISOString());
-      // });
+          server.of(`/${namespace}`).emit("heartbeat", {
+            updated_date,
+            from: namespace,
+          });
+        };
+        setInterval(heartbeat_function, 10000, new Date().toISOString());
+      });
 
       onEvent((event) => {
         const { namespace = null, event_name = "change_event" } = event;
