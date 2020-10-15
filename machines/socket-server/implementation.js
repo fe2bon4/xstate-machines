@@ -1,4 +1,4 @@
-const { sendParent, assign, send: sendTo } = require("xstate");
+const { sendParent, assign, forwardTo } = require("xstate");
 const HTTP = require("http");
 const Server = require("socket.io");
 
@@ -22,8 +22,8 @@ module.exports = {
         }`
       ),
     assignServer: assign({ server: (_, event) => event.server }),
+    sendToEmmitters: forwardTo("emmitters"),
     sendToInvoker: sendParent((_, event) => event),
-    sendToEmmitters: sendTo((_, event) => event.payload, { to: "emmitters" }),
   },
   services: {
     setupServer: (ctx) => (send) => {
@@ -105,14 +105,9 @@ module.exports = {
       });
 
       onEvent((event) => {
-        const { namespace = null, event_name = "change_event" } = event;
+        const { namespace = "", event_name = "change_event", payload } = event;
 
-        if (!namespace) {
-          console.log(event);
-          server.of(`/`).emit(event_name, event.payload);
-        } else {
-          server.of(`/${namespace}`).emit(event_name, event.payload);
-        }
+        server.of(`/${namespace}`).emit(event_name, payload);
       });
     },
   },

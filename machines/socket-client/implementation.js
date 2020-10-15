@@ -38,6 +38,7 @@ module.exports = {
 
       socket.emit(event.event_name, event.payload);
     },
+    sendToInvoker: sendParent((_, event) => event),
   },
   services: {
     setupClient: (ctx) => (send) => {
