@@ -1,10 +1,11 @@
-const { respond } = require("xstate");
+const { sendParent } = require("xstate");
 const { omit } = require("lodash");
 module.exports = {
   actions: {
+    logReady: () => console.log(`[LocalCache] Ready for requests`),
     logRequest: (_, event) =>
       console.log(`[LocalCache] ${event.type}, ${event.key} ${event.payload}`),
-    setKey: respond((context, event) => {
+    setKey: sendParent((context, event) => {
       const { key, payload } = event;
 
       context.data[key] = payload;
@@ -14,7 +15,7 @@ module.exports = {
         value,
       };
     }),
-    getKey: respond((context, event) => {
+    getKey: sendParent((context, event) => {
       const { key } = event;
 
       return {
@@ -23,7 +24,7 @@ module.exports = {
         value: context.data[key] || null,
       };
     }),
-    deleteKey: respond((context, event) => {
+    deleteKey: sendParent((context, event) => {
       const { key } = event;
 
       context.data = omit(context.data, [key]);
@@ -33,5 +34,10 @@ module.exports = {
         key,
       };
     }),
+  },
+  services: {
+    listeners: () => (send) => {
+      setInterval(() => {}, 30000);
+    },
   },
 };

@@ -11,6 +11,11 @@ const config = {
       },
     },
     ready: {
+      entry: ["logReady"],
+      invoke: {
+        id: "listeners",
+        src: "listeners",
+      },
       on: {
         SET_KEY: {
           actions: ["logRequest", "setKey"],
@@ -25,3 +30,5 @@ const config = {
     },
   },
 };
+
+module.exports = config;
