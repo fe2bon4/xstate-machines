@@ -13,15 +13,21 @@ module.exports = {
     logInitializing: () => console.log(`[Socket.IO] Client Initializing`),
     logClientStarted: (context) =>
       console.log(
-        `[Socket.IO] Client Started Listening to ${context.endpoint}/${context.namespace}`
+        `[Socket.IO] Client started connecting to ${context.endpoint}/${context.namespace}`
       ),
-    logConnection: (_, event) =>
+    logConnection: (context, event) =>
       console.log(
         `[Socket.IO] Socket has connected. Namespace: ${
-          event.namespace || "default"
+          context.namespace || "default"
         }`
       ),
-    logDisonnection: (_, event) =>
+    logReconnecting: (context) =>
+      console.log(
+        `[Socket.IO] Socket is reconnecting. Namespace: ${
+          context.namespace || "default"
+        }`
+      ),
+    logDisconnection: (_, event) =>
       console.log(
         `[Socket.IO] Socket has disconnected. Namespace: ${
           event.namespace || "default"
@@ -41,6 +47,35 @@ module.exports = {
     sendToInvoker: sendParent((_, event) => event),
   },
   services: {
+    connectionListener: ({ socket }) => (send) => {
+      socket.once("connect", (e) => {
+        send({
+          type: "SOCKET_CONNECTION",
+          error: e,
+        });
+      });
+
+      socket.once("connect_error", (e) => {
+        send({
+          type: "ERROR",
+          error: e,
+        });
+      });
+
+      socket.once("connect_timeout", (timeout) => {
+        send({
+          type: "ERROR",
+          error: new Error(`ConnectionTimeout`),
+        });
+      });
+    },
+    disconnectionListener: ({ socket }) => (send) => {
+      socket.once("disconnect", () => {
+        send({
+          type: "SOCKET_DISCONNECTION",
+        });
+      });
+    },
     setupClient: (ctx) => (send) => {
       const { endpoint, namespace } = ctx;
       const connection_string = `${endpoint}/${namespace}`;
@@ -53,20 +88,7 @@ module.exports = {
         socket,
       });
 
-      socket.once("connect", () => {
-        send({
-          type: "CLIENT_CONNECTED",
-        });
-      });
-
       socket.on("error", (e) => {
-        send({
-          type: "ERROR",
-          error: e,
-        });
-      });
-
-      socket.on("connect_error", (e) => {
         send({
           type: "ERROR",
           error: e,
@@ -76,13 +98,7 @@ module.exports = {
     listeners: (ctx) => (send) => {
       const { socket, events } = ctx;
 
-      socket.removeAllListeners();
-
-      socket.once("disconnect", () => {
-        send({
-          type: "SOCKET_DISCONNECTION",
-        });
-      });
+      // socket.removeAllListeners();
 
       events.forEach((event_name) => {
         socket.on(event_name, (payload) => {

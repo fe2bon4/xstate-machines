@@ -17,16 +17,41 @@ const config = {
       on: {
         CLIENT_CREATED: {
           actions: ["assignSocket"],
-        },
-        CLIENT_CONNECTED: {
-          target: "connected",
+          target: "running",
         },
         ERROR: {
           actions: ["logError"],
         },
       },
     },
-    connected: {
+    running: {
+      initial: "disconnected",
+      states: {
+        connected: {
+          invoke: {
+            id: "disconnectionListener",
+            src: "disconnectionListener",
+          },
+          on: {
+            SOCKET_DISCONNECTION: {
+              actions: ["logDisconnection"],
+              target: "disconnected",
+            },
+          },
+        },
+        disconnected: {
+          invoke: {
+            id: "connectionListener",
+            src: "connectionListener",
+          },
+          on: {
+            SOCKET_CONNECTION: {
+              actions: ["logConnection"],
+              target: "connected",
+            },
+          },
+        },
+      },
       entry: ["logClientStarted"],
       invoke: [
         {
@@ -38,12 +63,6 @@ const config = {
         EXTERNAL_EVENT: {
           actions: ["emitEvent"],
         },
-        SOCKET_CONNECTION: {
-          actions: ["logConnection"],
-        },
-        SOCKET_DISCONNECTION: {
-          actions: ["logDisonnection"],
-        },
         SOCKET_EVENT: {
           actions: ["logEvent", "sendToInvoker"],
         },
@@ -51,9 +70,6 @@ const config = {
           actions: ["logError"],
         },
       },
-    },
-    exit: {
-      type: "final",
     },
   },
 };
