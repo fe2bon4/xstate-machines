@@ -1,12 +1,14 @@
 {
-  "name": "apps",
+  "name": "xstate-machines",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A Collection self-contained XState State Machines.",
+  "main": "server",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "socket-server": "node server socket-server",
+    "kafka-producer": "node server kafka-producer",
+    "kafka-consumer": "node server kafka-consumer"
   },
-  "author": "",
+  "author": "Bon Lazaga (blazaga@dnamicro.com)",
   "license": "GNU GPL v3.0",
   "dependencies": {
     "kafkajs": "^1.14.0",
