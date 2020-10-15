@@ -1,20 +1,19 @@
-const { config, implementation } = require('../machines/kafka-consumer')
+const machine_name = process.argv[2] || "socket-server";
 
-const { Machine, interpret } = require('xstate')
+console.log(machine_name);
 
-const machine = Machine( config, implementation )
+const { config, implementation } = require(`../machines/${machine_name}`);
 
-const service = interpret( machine)
+const { Machine, interpret } = require("xstate");
 
+const machine = Machine(config, implementation);
 
-service.onEvent((e) => {
-  if( e.type === 'TOPIC_MESSAGE')
-  console.log( e )
-})
+const service = interpret(machine);
+
+// service.onEvent((e) => {});
 
 service.onDone(() => {
-  process.exit(0)
-})
+  process.exit(0);
+});
 
-service.start()
-
+service.start();
